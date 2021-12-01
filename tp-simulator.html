@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+	<script type="text/javascript">
+	
+	//var gwebURL = 'https://galaxy11-testnext.bertschi.com/preview/g11-simulator.html';
+	// var gwebURL = 'https://galaxy11-dev.bertschi.com/preview/g11-simulator.html';
+	var gwebURL = 'https://galaxy11-dev.bertschi.com';
+	var gwebWindow = null;
+
+	function executeG11Command(message) {
+	  if(gwebWindow == null || gwebWindow.closed) {
+		gwebWindow = window.open(gwebURL, '_blank',	'hotkeys = no, menubar = no, resizable = yes, scrollbars = yes, status = no, toolbar = no');
+        gwebWindow.addEventListener('load', (event)=> {
+			gwebWindow.postMessage(message, gwebURL);
+		}, false);
+
+
+		
+		gwebWindow.moveTo(window.screenX + 700, window.screenY + 500);
+        gwebWindow.resizeTo(1080, 768);
+	  } else {
+		gwebWindow.focus();
+		gwebWindow.postMessage(message, gwebURL);
+	  };
+	}
+	
+	function log(text) {
+		var console = document.getElementById('console') ;
+		console.value =  text + '\r\n' + console.value;
+	}
+	
+	window.addEventListener('message', (event) => {
+		log('received: ' + JSON.stringify(event.data));
+	}, false);
+	
+	</script>
+	<body>
+		<h1>Truckplanning Simulator</h1>
+		<ul>
+			<li>
+				<button onclick="executeG11Command({'command':'navigate','data':{'screen':'S-TR-0440-7','record':'965621612','parameters':{'TR_LEG_ID':'965621629'}}});">Booking 0841101/10</button>
+			</li>
+			<li>
+				<button onclick="executeG11Command({'command':'navigate','data':{'screen':'S-TR-0440-7','record':'969675566','parameters':{'TR_LEG_ID':'969675578'}}});">Booking 0841102/30</button>
+			</li>
+			<li>
+			    <button onclick="executeG11Command({'command':'navigate','data':{'screen':'S-TR-0440-7','record':'970046132','parameters':{'TR_LEG_ID':'1041939314'}}});">Booking 0841103/50</button>
+			</li>
+		</ul>
+		<textarea id="console" rows="10" cols="100" readonly></textarea>
+	</body>
+</html>

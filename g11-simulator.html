@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+	<script type="text/javascript">
+
+	var loggedIn = false;
+	var waitingCommand = null;
+		
+	window.addEventListener('message', (event) => {
+		executeCommand(event.data);
+		
+	}, false);
+	
+	window.addEventListener('beforeunload', (event) => {
+		closeWindow();
+	});
+
+	function executeCommand(command) {
+		if (loggedIn) {
+			if (command.command == "navigate") {
+				document.getElementById('screen').value = command.data.screen + ':' + + command.data.record;
+			}
+			log('executed: ' + JSON.stringify(command));
+		} else {
+			waitingCommand = command;
+			log('waiting:  ' + JSON.stringify(command));
+		}
+	}
+	
+	
+	function sendResponse(response) {
+		window.opener.postMessage(response, "*");
+	}
+	
+	function login() {
+		loggedIn = true;
+		document.getElementById('login').disabled = true;
+		document.getElementById('logout').disabled = false;
+		sendResponse({'state' : 'logged-in'});
+		if (waitingCommand != null) {
+			executeCommand(waitingCommand);
+			waitingCommand = null;
+		}
+	}
+	
+	function logout() {
+		loggedIn = false;
+		document.getElementById('login').disabled = false;
+		document.getElementById('logout').disabled = true;
+		document.getElementById('screen').value = 'login-screen';
+		sendResponse({'state' : 'logged-out'});
+	}
+	
+	function closeWindow() {
+		sendResponse({'state' : 'closed'});
+	}
+	
+	function log(text) {
+		var console = document.getElementById('console') ;
+		console.value =  text + '\r\n' + console.value;
+	}
+
+	</script>
+	<body>
+		<h1>G11 Simulator</h1>
+		<button id="login" onclick="login();">login</button>
+		<button id="logout" onclick="logout();" disabled="true">logout</button>
+		<button id="close" onclick="window.close();">close</button>
+		<br><br>
+		<label>Screen:</label><input id="screen" value='login-screen' size="50" readonly></p>
+		<br><br>
+		<textarea id="console" rows="10" cols="130" readonly></textarea>
+	</body>
+</html>
